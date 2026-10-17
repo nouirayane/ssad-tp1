@@ -5,7 +5,12 @@ Partie 1 : interface (Chiffrement/Dechiffrement, Mots de passe, Attaques, Authen
 Partie 2 : chiffrement et dechiffrement d'un message envoye par A a B avec :
 - Cesar (decalage de n rangs, gauche -> droite ou droite -> gauche)
 - Playfair
-- Hill (matrice 2x2)
+- Hill (matrice 2x2 ou 3x3)
+
+Traitement des failles :
+- Cesar : alphabet etendu (63 symboles), espaces chiffres, cles faibles refusees
+- Playfair : matrice 6x6 (lettres + chiffres, plus de confusion I/J), suppression du bourrage
+- Hill : verification du determinant modulo 26, matrice identite refusee, matrice 3x3 possible
 
 ## Lancement
 

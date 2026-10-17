@@ -7,7 +7,7 @@ class FenetreChiffrement:
     def __init__(self, parent):
         self.fen = tk.Toplevel(parent)
         self.fen.title("Chiffrement / Dechiffrement")
-        self.fen.geometry("620x560")
+        self.fen.geometry("680x680")
 
         tk.Label(self.fen, text="Entite A  ->  Entite B", font=("Arial", 14, "bold")).pack(pady=10)
 
@@ -33,6 +33,9 @@ class FenetreChiffrement:
         self.sens.current(0)
         self.sens.grid(row=3, column=1, pady=4)
 
+        self.failles = tk.Label(self.fen, text="", fg="#b03030", justify="left", wraplength=640)
+        self.failles.pack(padx=20, pady=5)
+
         tk.Label(self.fen, text="Message de A :").pack(anchor="w", padx=20)
         self.message = tk.Text(self.fen, height=4, width=70)
         self.message.pack(padx=20)
@@ -53,16 +56,17 @@ class FenetreChiffrement:
 
     def changer_algo(self, event=None):
         a = self.algo.get()
+        self.failles.config(text=FAILLES[a])
         if a == "Cesar":
-            self.info.config(text="Decalage n entre 1 et 25")
+            self.info.config(text="Decalage n (nombre entier)")
             self.label_sens.grid()
             self.sens.grid()
         elif a == "Playfair":
-            self.info.config(text="Un mot cle (lettres seulement)")
+            self.info.config(text="Un mot cle (lettres et chiffres)")
             self.label_sens.grid_remove()
             self.sens.grid_remove()
         else:
-            self.info.config(text="Matrice 2x2 : 4 nombres, exemple : 3 3 2 5")
+            self.info.config(text="Matrice 2x2 (4 nombres, ex : 3 3 2 5) ou 3x3 (9 nombres)")
             self.label_sens.grid_remove()
             self.sens.grid_remove()
 
@@ -71,20 +75,13 @@ class FenetreChiffrement:
             n = int(self.cle.get())
         except ValueError:
             raise ValueError("Le decalage doit etre un nombre entier")
-        if n % 26 == 0:
-            raise ValueError("Un decalage multiple de 26 ne chiffre pas le message")
         if self.sens.get() == "Gauche -> Droite":
             return n, "droite"
         return n, "gauche"
 
-    def lire_playfair(self):
-        if nettoyer(self.cle.get()) == "":
-            raise ValueError("La cle Playfair doit contenir des lettres")
-        return self.cle.get()
-
     def envoyer(self):
         texte = self.message.get("1.0", "end").strip()
-        if nettoyer(texte) == "":
+        if texte == "":
             messagebox.showwarning("Attention", "Ecrire un message", parent=self.fen)
             return
         try:
@@ -93,7 +90,7 @@ class FenetreChiffrement:
                 n, sens = self.lire_cesar()
                 res = cesar_chiffrer(texte, n, sens)
             elif a == "Playfair":
-                res = playfair_chiffrer(texte, self.lire_playfair())
+                res = playfair_chiffrer(texte, self.cle.get())
             else:
                 res = hill_chiffrer(texte, self.cle.get())
         except ValueError as e:
@@ -114,7 +111,7 @@ class FenetreChiffrement:
                 n, sens = self.lire_cesar()
                 res = cesar_dechiffrer(texte, n, sens)
             elif a == "Playfair":
-                res = playfair_dechiffrer(texte, self.lire_playfair())
+                res = playfair_dechiffrer(texte, self.cle.get())
             else:
                 res = hill_dechiffrer(texte, self.cle.get())
         except ValueError as e:
