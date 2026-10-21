@@ -69,7 +69,7 @@ class Page(tk.Frame):
 
 class PageAccueil(Page):
     titre = "Tableau de bord"
-    sous_titre = "Framework de chiffrement  ·  TP n°1  ·  Sécurité des Systèmes et Audit de Données"
+    sous_titre = "Sécurité des Systèmes et Audit de Données"
 
     def __init__(self, parent, app):
         super().__init__(parent, app)
@@ -295,7 +295,7 @@ class PageChiffrement(Page):
     def effacer(self):
         for z in (self.message, self.chiffre, self.dechiffre):
             z.delete("1.0", "end")
-        self.app.statut("Prêt.")
+        self.app.statut("")
 
 
 CAS = [("Cas 1", "3 caractères  ·  valeurs 0 et 1", "01", 3),
@@ -509,7 +509,7 @@ class PageIntegrite(Page):
 class Application(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Framework de chiffrement — SSAD")
+        self.title("SSAD")
         self.geometry("1280x820")
         self.minsize(1180, 760)
         self.configure(bg=FOND)
@@ -519,9 +519,7 @@ class Application(tk.Tk):
         menu = tk.Frame(self, bg=MENU, width=250)
         menu.pack(side="left", fill="y")
         menu.pack_propagate(False)
-        tk.Label(menu, text="SSAD", bg=MENU, fg="white", font=(self.police, 18, "bold")).pack(anchor="w", padx=22, pady=(24, 0))
-        tk.Label(menu, text="Framework de chiffrement", bg=MENU, fg=MENU_TEXTE,
-                 font=(self.police, 10)).pack(anchor="w", padx=22, pady=(0, 24))
+        tk.Label(menu, text="SSAD", bg=MENU, fg="white", font=(self.police, 18, "bold")).pack(anchor="w", padx=22, pady=(24, 22))
         tk.Frame(menu, bg="#34465a", height=1).pack(fill="x", padx=22, pady=(0, 14))
 
         self.boutons = {}
@@ -547,9 +545,8 @@ class Application(tk.Tk):
         droite.pack(side="left", fill="both", expand=True)
         barre = tk.Frame(droite, bg=CARTE, highlightbackground=BORDURE, highlightthickness=1)
         barre.pack(side="bottom", fill="x")
-        self.texte_statut = tk.Label(barre, text="Prêt.", bg=CARTE, fg=GRIS, font=(self.police, 9), anchor="w")
+        self.texte_statut = tk.Label(barre, text="", bg=CARTE, fg=GRIS, font=(self.police, 9), anchor="w")
         self.texte_statut.pack(side="left", padx=12, pady=4)
-        tk.Label(barre, text="TP n°1", bg=CARTE, fg=GRIS, font=(self.police, 9)).pack(side="right", padx=12)
 
         zone = tk.Frame(droite, bg=FOND)
         zone.pack(fill="both", expand=True)
@@ -607,7 +604,7 @@ class Application(tk.Tk):
                 repere.config(bg=MENU)
                 b.config(bg=MENU, fg=MENU_TEXTE)
         self.pages[cle].tkraise()
-        self.statut("Prêt.")
+        self.statut("")
 
     def statut(self, texte):
         self.texte_statut.config(text=texte)
