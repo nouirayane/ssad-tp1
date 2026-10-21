@@ -549,7 +549,7 @@ class Application(tk.Tk):
         barre.pack(side="bottom", fill="x")
         self.texte_statut = tk.Label(barre, text="Prêt.", bg=CARTE, fg=GRIS, font=(self.police, 9), anchor="w")
         self.texte_statut.pack(side="left", padx=12, pady=4)
-        tk.Label(barre, text="TP n°1  ·  Prof. NACER", bg=CARTE, fg=GRIS, font=(self.police, 9)).pack(side="right", padx=12)
+        tk.Label(barre, text="TP n°1", bg=CARTE, fg=GRIS, font=(self.police, 9)).pack(side="right", padx=12)
 
         zone = tk.Frame(droite, bg=FOND)
         zone.pack(fill="both", expand=True)
