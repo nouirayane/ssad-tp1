@@ -29,7 +29,7 @@ class Carte(tk.Frame):
         super().__init__(parent, bg=CARTE, highlightbackground=BORDURE, highlightthickness=1)
         entete = tk.Frame(self, bg=CARTE)
         entete.pack(fill="x", padx=16, pady=(12, 0))
-        tk.Label(entete, text=titre, bg=CARTE, fg=TEXTE, font=(police, 10, "bold")).pack(side="left")
+        tk.Label(entete, text=titre, bg=CARTE, fg=TEXTE, font=(police, 11, "bold")).pack(side="left")
         tk.Frame(self, bg=BORDURE, height=1).pack(fill="x", padx=16, pady=(10, 0))
         self.corps = tk.Frame(self, bg=CARTE)
         self.corps.pack(fill="both", expand=True, padx=16, pady=12)
@@ -37,14 +37,14 @@ class Carte(tk.Frame):
 
 def zone_texte(parent, police, hauteur=5):
     cadre = tk.Frame(parent, bg=BORDURE, padx=1, pady=1)
-    t = tk.Text(cadre, height=hauteur, width=10, relief="flat", wrap="word", font=(police, 10), bg="#fbfbfc",
+    t = tk.Text(cadre, height=hauteur, width=10, relief="flat", wrap="word", font=(police, 11), bg="#fbfbfc",
                 fg=TEXTE, insertbackground=TEXTE, padx=8, pady=6, highlightthickness=0)
     t.pack(fill="both", expand=True)
     return cadre, t
 
 
 def etiquette(parent, texte, police, gris=False, gras=False):
-    style = (police, 9, "bold") if gras else (police, 9)
+    style = (police, 10, "bold") if gras else (police, 10)
     return tk.Label(parent, text=texte, bg=CARTE, fg=GRIS if gris else TEXTE, font=style, anchor="w", justify="left")
 
 
@@ -57,11 +57,11 @@ class Page(tk.Frame):
         self.app = app
         self.police = app.police
         entete = tk.Frame(self, bg=FOND)
-        entete.pack(fill="x", padx=24, pady=(20, 14))
-        tk.Label(entete, text=self.titre, bg=FOND, fg=TEXTE, font=(self.police, 15, "bold")).pack(anchor="w")
-        tk.Label(entete, text=self.sous_titre, bg=FOND, fg=GRIS, font=(self.police, 9)).pack(anchor="w", pady=(2, 0))
+        entete.pack(fill="x", padx=28, pady=(24, 16))
+        tk.Label(entete, text=self.titre, bg=FOND, fg=TEXTE, font=(self.police, 17, "bold")).pack(anchor="w")
+        tk.Label(entete, text=self.sous_titre, bg=FOND, fg=GRIS, font=(self.police, 10)).pack(anchor="w", pady=(2, 0))
         self.contenu = tk.Frame(self, bg=FOND)
-        self.contenu.pack(fill="both", expand=True, padx=24, pady=(0, 20))
+        self.contenu.pack(fill="both", expand=True, padx=28, pady=(0, 24))
 
     def carte(self, parent, titre):
         return Carte(parent, titre, self.police)
@@ -73,18 +73,8 @@ class PageAccueil(Page):
 
     def __init__(self, parent, app):
         super().__init__(parent, app)
-        info = self.carte(self.contenu, "Informations du projet")
-        info.pack(fill="x")
-        lignes = [("Établissement", "Université des Sciences et de la Technologie Houari Boumediene"),
-                  ("Module", "SSAD"),
-                  ("Enseignant", "Prof. NACER"),
-                  ("Année universitaire", "2026 – 2027")]
-        for i, (cle, valeur) in enumerate(lignes):
-            etiquette(info.corps, cle, self.police, gris=True).grid(row=i, column=0, sticky="w", pady=3, padx=(0, 30))
-            etiquette(info.corps, valeur, self.police).grid(row=i, column=1, sticky="w", pady=3)
-
         grille = tk.Frame(self.contenu, bg=FOND)
-        grille.pack(fill="both", expand=True, pady=(16, 0))
+        grille.pack(fill="both", expand=True)
         modules = [("Chiffrement / Déchiffrement", "Partie 2",
                     "Échange d'un message entre une entité A et une entité B avec les algorithmes César, Playfair et Hill.",
                     "chiffrement"),
@@ -101,11 +91,14 @@ class PageAccueil(Page):
             c = tk.Frame(grille, bg=CARTE, highlightbackground=BORDURE, highlightthickness=1)
             c.grid(row=i // 2, column=i % 2, sticky="nsew", padx=(0 if i % 2 == 0 else 8, 8 if i % 2 == 0 else 0),
                    pady=(0, 16))
-            tk.Label(c, text=partie.upper(), bg=CARTE, fg=BLEU, font=(self.police, 8, "bold")).pack(anchor="w", padx=16, pady=(14, 0))
-            tk.Label(c, text=nom, bg=CARTE, fg=TEXTE, font=(self.police, 12, "bold")).pack(anchor="w", padx=16, pady=(2, 4))
-            tk.Label(c, text=desc, bg=CARTE, fg=GRIS, font=(self.police, 9), wraplength=380, justify="left").pack(anchor="w", padx=16)
-            ttk.Button(c, text="Ouvrir", style="Secondaire.TButton",
-                       command=lambda k=cle: self.app.afficher(k)).pack(anchor="w", padx=16, pady=14)
+            tk.Frame(c, bg=BLEU, height=3).pack(fill="x")
+            tk.Label(c, text=partie.upper(), bg=CARTE, fg=BLEU, font=(self.police, 9, "bold")).pack(anchor="w", padx=22, pady=(22, 0))
+            tk.Label(c, text=nom, bg=CARTE, fg=TEXTE, font=(self.police, 14, "bold")).pack(anchor="w", padx=22, pady=(4, 8))
+            tk.Label(c, text=desc, bg=CARTE, fg=GRIS, font=(self.police, 10), wraplength=400, justify="left").pack(anchor="w", padx=22)
+            ttk.Button(c, text="Ouvrir le module", style="Principal.TButton",
+                       command=lambda k=cle: self.app.afficher(k)).pack(side="bottom", anchor="w", padx=22, pady=22)
+        grille.rowconfigure(0, weight=1, uniform="r")
+        grille.rowconfigure(1, weight=1, uniform="r")
         grille.columnconfigure(0, weight=1, uniform="m")
         grille.columnconfigure(1, weight=1, uniform="m")
 
@@ -153,13 +146,13 @@ class PageChiffrement(Page):
         etiquette(self.cadre_playfair, "Mot clé", self.police).grid(row=0, column=0, sticky="nw")
         self.mot_cle = tk.StringVar(value="SECURITE")
         self.mot_cle.trace_add("write", lambda *a: self.maj_matrice())
-        ttk.Entry(self.cadre_playfair, textvariable=self.mot_cle, width=22).grid(row=0, column=1, sticky="nw", padx=10)
+        ttk.Entry(self.cadre_playfair, textvariable=self.mot_cle, width=18).grid(row=0, column=1, sticky="nw", padx=10)
         self.matrice = tk.Frame(self.cadre_playfair, bg=BORDURE, padx=1, pady=1)
         self.matrice.grid(row=0, column=2, rowspan=2, padx=(16, 0))
         self.cases = []
         for i in range(6):
             for j in range(6):
-                l = tk.Label(self.matrice, text="", width=3, bg="#f6f7f9", fg=TEXTE, font=("Courier", 9))
+                l = tk.Label(self.matrice, text="", width=3, bg="#f6f7f9", fg=TEXTE, font=("Courier", 10))
                 l.grid(row=i, column=j, padx=1, pady=1)
                 self.cases.append(l)
 
@@ -178,7 +171,7 @@ class PageChiffrement(Page):
 
         failles = self.carte(haut, "Faille et contre-mesure")
         failles.grid(row=0, column=1, sticky="nsew", padx=(16, 0))
-        self.texte_failles = tk.Label(failles.corps, text="", bg=CARTE, fg=TEXTE, font=(self.police, 9),
+        self.texte_failles = tk.Label(failles.corps, text="", bg=CARTE, fg=TEXTE, font=(self.police, 10),
                                       justify="left", anchor="nw", wraplength=380)
         self.texte_failles.pack(fill="both", expand=True)
         self.texte_failles.bind("<Configure>", lambda e: self.texte_failles.config(wraplength=e.width - 4))
@@ -366,7 +359,7 @@ class PageMotsDePasse(Page):
         droite = self.carte(self.contenu, "Comptes enregistrés")
         droite.pack(side="left", fill="both", expand=True, padx=(16, 0))
         self.table = ttk.Treeview(droite.corps, columns=("id", "cas", "empreinte"), show="headings", height=10)
-        for col, titre, lg in [("id", "Identifiant", 110), ("cas", "Politique", 70), ("empreinte", "Empreinte stockée", 260)]:
+        for col, titre, lg in [("id", "Identifiant", 110), ("cas", "Politique", 90), ("empreinte", "Empreinte stockée", 240)]:
             self.table.heading(col, text=titre, anchor="w")
             self.table.column(col, width=lg, anchor="w")
         self.table.pack(fill="both", expand=True)
@@ -425,7 +418,7 @@ class PageAttaques(Page):
         compteurs.pack(anchor="w", fill="x")
         for i, (titre, val) in enumerate([("Tentatives", "0"), ("Temps écoulé", "0.000 s"), ("Résultat", "—")]):
             etiquette(compteurs, titre, self.police, gris=True).grid(row=0, column=i, sticky="w", padx=(0, 28))
-            tk.Label(compteurs, text=val, bg=CARTE, fg=TEXTE, font=(self.police, 12, "bold")).grid(row=1, column=i, sticky="w")
+            tk.Label(compteurs, text=val, bg=CARTE, fg=TEXTE, font=(self.police, 14, "bold")).grid(row=1, column=i, sticky="w")
 
         bas = tk.Frame(self.contenu, bg=FOND)
         bas.pack(fill="both", expand=True, pady=(16, 0))
@@ -445,7 +438,7 @@ class PageAttaques(Page):
         journal = self.carte(bas, "Journal")
         journal.grid(row=0, column=1, sticky="nsew", padx=(16, 0))
         cadre, self.journal = zone_texte(journal.corps, self.police, 8)
-        self.journal.config(font=("Courier", 9), fg=GRIS)
+        self.journal.config(font=("Courier", 10), fg=GRIS)
         self.journal.insert("1.0", "En attente du lancement d'une attaque.")
         self.journal.config(state="disabled")
         cadre.pack(fill="both", expand=True)
@@ -488,7 +481,7 @@ class PageIntegrite(Page):
         cadre, self.message = zone_texte(a.corps, self.police, 7)
         cadre.pack(fill="both", expand=True, pady=(4, 10))
         etiquette(a.corps, "Empreinte générée", self.police, gris=True).pack(anchor="w")
-        self.empreinte = ttk.Entry(a.corps, state="readonly", font=("Courier", 9))
+        self.empreinte = ttk.Entry(a.corps, state="readonly", font=("Courier", 10))
         self.empreinte.pack(fill="x", pady=(4, 12))
         ttk.Button(a.corps, text="Générer et envoyer", style="Principal.TButton",
                    command=self.app.non_disponible).pack(anchor="w")
@@ -499,13 +492,13 @@ class PageIntegrite(Page):
         cadre, self.recu = zone_texte(b.corps, self.police, 7)
         cadre.pack(fill="both", expand=True, pady=(4, 10))
         etiquette(b.corps, "Empreinte reçue", self.police, gris=True).pack(anchor="w")
-        self.empreinte_recue = ttk.Entry(b.corps, font=("Courier", 9))
+        self.empreinte_recue = ttk.Entry(b.corps, font=("Courier", 10))
         self.empreinte_recue.pack(fill="x", pady=(4, 12))
         ligne = tk.Frame(b.corps, bg=CARTE)
         ligne.pack(fill="x")
         ttk.Button(ligne, text="Vérifier", style="Principal.TButton", command=self.app.non_disponible).pack(side="left")
         self.verdict = tk.Label(ligne, text="En attente de vérification", bg="#f1f2f4", fg=GRIS,
-                                font=(self.police, 9), padx=10, pady=4)
+                                font=(self.police, 10), padx=10, pady=4)
         self.verdict.pack(side="left", padx=12)
         self.maj_cle()
 
@@ -517,18 +510,18 @@ class Application(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Framework de chiffrement — SSAD")
-        self.geometry("1200x760")
-        self.minsize(1100, 700)
+        self.geometry("1280x820")
+        self.minsize(1180, 760)
         self.configure(bg=FOND)
         self.police = choisir_police()
         self.styles()
 
-        menu = tk.Frame(self, bg=MENU, width=230)
+        menu = tk.Frame(self, bg=MENU, width=250)
         menu.pack(side="left", fill="y")
         menu.pack_propagate(False)
-        tk.Label(menu, text="SSAD", bg=MENU, fg="white", font=(self.police, 16, "bold")).pack(anchor="w", padx=22, pady=(24, 0))
+        tk.Label(menu, text="SSAD", bg=MENU, fg="white", font=(self.police, 18, "bold")).pack(anchor="w", padx=22, pady=(24, 0))
         tk.Label(menu, text="Framework de chiffrement", bg=MENU, fg=MENU_TEXTE,
-                 font=(self.police, 9)).pack(anchor="w", padx=22, pady=(0, 24))
+                 font=(self.police, 10)).pack(anchor="w", padx=22, pady=(0, 24))
         tk.Frame(menu, bg="#34465a", height=1).pack(fill="x", padx=22, pady=(0, 14))
 
         self.boutons = {}
@@ -541,24 +534,22 @@ class Application(tk.Tk):
             ligne.pack(fill="x")
             repere = tk.Frame(ligne, bg=MENU, width=3)
             repere.pack(side="left", fill="y")
-            b = tk.Label(ligne, text=texte, bg=MENU, fg=MENU_TEXTE, font=(self.police, 10), anchor="w",
-                         padx=19, pady=9, cursor="hand2")
+            b = tk.Label(ligne, text=texte, bg=MENU, fg=MENU_TEXTE, font=(self.police, 11), anchor="w",
+                         padx=19, pady=11, cursor="hand2")
             b.pack(side="left", fill="x", expand=True)
             b.bind("<Button-1>", lambda e, k=cle: self.afficher(k))
             b.bind("<Enter>", lambda e, k=cle: self.survol(k, True))
             b.bind("<Leave>", lambda e, k=cle: self.survol(k, False))
             self.boutons[cle] = (repere, b)
 
-        tk.Label(menu, text="USTHB  ·  2026 – 2027", bg=MENU, fg="#7d8b9a",
-                 font=(self.police, 8)).pack(side="bottom", anchor="w", padx=22, pady=16)
 
         droite = tk.Frame(self, bg=FOND)
         droite.pack(side="left", fill="both", expand=True)
         barre = tk.Frame(droite, bg=CARTE, highlightbackground=BORDURE, highlightthickness=1)
         barre.pack(side="bottom", fill="x")
-        self.texte_statut = tk.Label(barre, text="Prêt.", bg=CARTE, fg=GRIS, font=(self.police, 8), anchor="w")
+        self.texte_statut = tk.Label(barre, text="Prêt.", bg=CARTE, fg=GRIS, font=(self.police, 9), anchor="w")
         self.texte_statut.pack(side="left", padx=12, pady=4)
-        tk.Label(barre, text="TP n°1  ·  Prof. NACER", bg=CARTE, fg=GRIS, font=(self.police, 8)).pack(side="right", padx=12)
+        tk.Label(barre, text="TP n°1  ·  Prof. NACER", bg=CARTE, fg=GRIS, font=(self.police, 9)).pack(side="right", padx=12)
 
         zone = tk.Frame(droite, bg=FOND)
         zone.pack(fill="both", expand=True)
@@ -576,9 +567,9 @@ class Application(tk.Tk):
         s = ttk.Style(self)
         s.theme_use("clam")
         p = self.police
-        s.configure(".", font=(p, 9), background=CARTE, foreground=TEXTE)
-        s.configure("TRadiobutton", background=CARTE, font=(p, 9))
-        s.configure("TCheckbutton", background=CARTE, font=(p, 9))
+        s.configure(".", font=(p, 10), background=CARTE, foreground=TEXTE)
+        s.configure("TRadiobutton", background=CARTE, font=(p, 10))
+        s.configure("TCheckbutton", background=CARTE, font=(p, 10))
         s.map("TRadiobutton", background=[("active", CARTE)])
         s.map("TCheckbutton", background=[("active", CARTE)])
         s.configure("TEntry", fieldbackground="#fbfbfc", bordercolor=BORDURE, lightcolor=BORDURE, padding=4)
@@ -588,14 +579,14 @@ class Application(tk.Tk):
         s.configure("TCombobox", fieldbackground="#fbfbfc", bordercolor=BORDURE, lightcolor=BORDURE, padding=3)
         s.map("TCombobox", fieldbackground=[("readonly", "#fbfbfc")])
         s.configure("Principal.TButton", background=BLEU, foreground="white", bordercolor=BLEU_FONCE,
-                    lightcolor=BLEU, darkcolor=BLEU_FONCE, font=(p, 9, "bold"), padding=(14, 6))
+                    lightcolor=BLEU, darkcolor=BLEU_FONCE, font=(p, 10, "bold"), padding=(16, 7))
         s.map("Principal.TButton", background=[("pressed", BLEU_FONCE), ("active", BLEU_FONCE)])
         s.configure("Secondaire.TButton", background="#f4f5f7", foreground=TEXTE, bordercolor=BORDURE,
-                    lightcolor="#f4f5f7", darkcolor=BORDURE, padding=(12, 6))
+                    lightcolor="#f4f5f7", darkcolor=BORDURE, padding=(14, 7))
         s.map("Secondaire.TButton", background=[("pressed", "#e3e6ea"), ("active", "#e9ebee")])
-        s.configure("Treeview", background=CARTE, fieldbackground=CARTE, rowheight=26, bordercolor=BORDURE,
-                    font=(p, 9))
-        s.configure("Treeview.Heading", background="#f4f5f7", foreground=GRIS, font=(p, 9, "bold"),
+        s.configure("Treeview", background=CARTE, fieldbackground=CARTE, rowheight=28, bordercolor=BORDURE,
+                    font=(p, 10))
+        s.configure("Treeview.Heading", background="#f4f5f7", foreground=GRIS, font=(p, 10, "bold"),
                     bordercolor=BORDURE, relief="flat", padding=(6, 5))
         s.map("Treeview.Heading", background=[("active", "#eceef1")])
         s.configure("Horizontal.TProgressbar", background=BLEU, troughcolor="#e6e9ed", bordercolor=BORDURE,
