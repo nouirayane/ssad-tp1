@@ -1,37 +1,39 @@
 import string
+import random
+import secrets
+import unicodedata
 
-ALPHABET = string.ascii_uppercase
-ALPHABET_CESAR = string.ascii_uppercase + string.ascii_lowercase + string.digits + " "
-ALPHABET_PLAYFAIR = string.ascii_uppercase + string.digits
-ALPHABET_HILL = string.ascii_uppercase + " .,"
+SYMBOLES = string.ascii_uppercase + string.ascii_lowercase + string.digits + " .,;:!?'-()\"/@#%&*+"
+ALPHABET_HILL = SYMBOLES + "=_"
 MOD = len(ALPHABET_HILL)
 
 
-def nettoyer(texte, alphabet=ALPHABET):
-    texte = texte.upper()
-    resultat = ""
+def enlever_accents(texte):
+    texte = unicodedata.normalize("NFD", texte)
+    return "".join(c for c in texte if unicodedata.category(c) != "Mn")
+
+
+def nettoyer(texte, alphabet):
+    texte = enlever_accents(texte).replace("\n", " ")
     for c in texte:
-        if c in alphabet:
-            resultat += c
-    return resultat
+        if c not in alphabet:
+            raise ValueError("Caractere non supporte : " + c)
+    return texte
 
 
 def cesar_verifier(n):
-    if n % len(ALPHABET_CESAR) == 0:
-        raise ValueError("Cle faible : un decalage multiple de " + str(len(ALPHABET_CESAR)) + " ne chiffre pas le message")
+    if n % len(SYMBOLES) == 0:
+        raise ValueError("Cle faible : un decalage multiple de " + str(len(SYMBOLES)) + " ne chiffre pas le message")
 
 
 def cesar_chiffrer(texte, n, sens):
     cesar_verifier(n)
     if sens == "gauche":
         n = -n
-    taille = len(ALPHABET_CESAR)
+    texte = nettoyer(texte, SYMBOLES)
     resultat = ""
     for c in texte:
-        if c in ALPHABET_CESAR:
-            resultat += ALPHABET_CESAR[(ALPHABET_CESAR.index(c) + n) % taille]
-        else:
-            resultat += c
+        resultat += SYMBOLES[(SYMBOLES.index(c) + n) % len(SYMBOLES)]
     return resultat
 
 
@@ -42,22 +44,22 @@ def cesar_dechiffrer(texte, n, sens):
 
 
 def playfair_matrice(cle):
-    cle = nettoyer(cle, ALPHABET_PLAYFAIR)
-    if cle == "":
-        raise ValueError("La cle Playfair doit contenir des lettres ou des chiffres")
+    cle = nettoyer(cle, SYMBOLES)
+    if cle.strip() == "":
+        raise ValueError("La cle Playfair ne doit pas etre vide")
     lettres = ""
-    for c in cle + ALPHABET_PLAYFAIR:
+    for c in cle + SYMBOLES:
         if c not in lettres:
             lettres += c
     matrice = []
-    for i in range(6):
-        matrice.append(list(lettres[i * 6:i * 6 + 6]))
+    for i in range(9):
+        matrice.append(list(lettres[i * 9:i * 9 + 9]))
     return matrice
 
 
 def playfair_position(matrice, lettre):
-    for i in range(6):
-        for j in range(6):
+    for i in range(9):
+        for j in range(9):
             if matrice[i][j] == lettre:
                 return i, j
 
@@ -69,7 +71,6 @@ def bourrage(lettre):
 
 
 def playfair_paires(texte):
-    texte = nettoyer(texte, ALPHABET_PLAYFAIR)
     paires = []
     i = 0
     while i < len(texte):
@@ -94,9 +95,9 @@ def playfair_traiter(paires, cle, d):
         l1, c1 = playfair_position(matrice, p[0])
         l2, c2 = playfair_position(matrice, p[1])
         if l1 == l2:
-            resultat += matrice[l1][(c1 + d) % 6] + matrice[l2][(c2 + d) % 6]
+            resultat += matrice[l1][(c1 + d) % 9] + matrice[l2][(c2 + d) % 9]
         elif c1 == c2:
-            resultat += matrice[(l1 + d) % 6][c1] + matrice[(l2 + d) % 6][c2]
+            resultat += matrice[(l1 + d) % 9][c1] + matrice[(l2 + d) % 9][c2]
         else:
             resultat += matrice[l1][c2] + matrice[l2][c1]
     return resultat
@@ -114,11 +115,12 @@ def playfair_enlever_bourrage(texte):
 
 
 def playfair_chiffrer(texte, cle):
+    texte = nettoyer(texte, SYMBOLES)
     return playfair_traiter(playfair_paires(texte), cle, 1)
 
 
 def playfair_dechiffrer(texte, cle):
-    texte = nettoyer(texte, ALPHABET_PLAYFAIR)
+    texte = nettoyer(texte, SYMBOLES)
     if len(texte) % 2 != 0:
         raise ValueError("Le texte chiffre doit avoir un nombre pair de caracteres")
     paires = [texte[i:i + 2] for i in range(0, len(texte), 2)]
@@ -201,7 +203,7 @@ def hill_appliquer(texte, m):
 
 def hill_chiffrer(texte, texte_cle):
     m = hill_cle(texte_cle)
-    texte = nettoyer(texte, ALPHABET_HILL)
+    texte = nettoyer(texte, SYMBOLES)
     while len(texte) % len(m) != 0:
         texte += " "
     return hill_appliquer(texte, m)
@@ -215,15 +217,53 @@ def hill_dechiffrer(texte, texte_cle):
     return hill_appliquer(texte, hill_inverse(m)).rstrip(" ")
 
 
+P = 2 ** 127 - 1
+G = 5
+
+
+def dh_secret():
+    return secrets.randbelow(P - 3) + 2
+
+
+def dh_public(secret):
+    return pow(G, secret, P)
+
+
+def dh_commun(public_autre, secret):
+    return pow(public_autre, secret, P)
+
+
+def cle_depuis_secret(s, algo):
+    if algo == "Cesar":
+        return str(s % (len(SYMBOLES) - 1) + 1)
+    if algo == "Playfair":
+        mot = ""
+        while len(mot) < 12:
+            mot += SYMBOLES[s % len(SYMBOLES)]
+            s //= len(SYMBOLES)
+        return mot
+    r = random.Random(s)
+    while True:
+        nombres = [r.randrange(MOD) for i in range(9)]
+        try:
+            hill_cle(" ".join(str(x) for x in nombres))
+            return " ".join(str(x) for x in nombres)
+        except ValueError:
+            pass
+
+
 FAILLES = {
-    "Cesar": "Faille : seulement 25 cles possibles (force brute) et les espaces/majuscules restent visibles.\n"
-             "Solution : alphabet etendu (majuscules, minuscules, chiffres, espace = 63 symboles),\n"
-             "les espaces sont chiffres et les cles faibles (multiple de 63) sont refusees.",
-    "Playfair": "Faille : I et J confondus, chiffres perdus, lettres doublees et X de bourrage dans le resultat.\n"
-                "Solution : matrice 6x6 (A-Z et 0-9), lettre de bourrage X ou Q,\n"
-                "et suppression du bourrage apres le dechiffrement. Cle vide refusee.",
-    "Hill": "Faille : les espaces sont supprimes, une matrice non inversible empeche le dechiffrement,\n"
-            "la matrice identite ne chiffre rien et une petite matrice est sensible au texte clair connu.\n"
-            "Solution : alphabet de 29 symboles (A-Z, espace, point, virgule) donc les espaces sont gardes,\n"
-            "modulo 29 premier, verification du determinant, refus de l'identite, matrice 3x3 possible.",
+    "Cesar": "Faille : peu de cles possibles (force brute) et les caracteres non chiffres restent visibles.\n"
+             "Solution : alphabet de " + str(len(SYMBOLES)) + " symboles (majuscules, minuscules, chiffres, espace, ponctuation),\n"
+             "tout le message est chiffre et les cles faibles sont refusees.",
+    "Playfair": "Faille : I et J confondus, espaces, chiffres et ponctuation perdus, lettres doublees.\n"
+                "Solution : matrice 9x9 (" + str(len(SYMBOLES)) + " symboles), lettre de bourrage X ou Q\n"
+                "supprimee apres le dechiffrement. Cle vide refusee.",
+    "Hill": "Faille : caracteres supprimes, matrice non inversible, matrice identite, attaque par texte clair connu.\n"
+            "Solution : alphabet de " + str(MOD) + " symboles (modulo premier), verification du determinant,\n"
+            "refus de l'identite, matrice 3x3 possible.",
 }
+
+PROBLEME_CLE = ("Probleme de la cle : si A envoie la cle a B sur le meme canal que le message, un attaquant\n"
+                "la recupere et dechiffre tout. Solution : echange de cle Diffie-Hellman. A et B envoient\n"
+                "seulement des valeurs publiques, chacun calcule le meme secret, la cle ne passe jamais sur le canal.")
