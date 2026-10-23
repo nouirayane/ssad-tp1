@@ -101,8 +101,8 @@ class FenetreChiffrement:
         self.dechiffre.delete("1.0", "end")
 
     def recevoir(self):
-        texte = self.chiffre.get("1.0", "end").strip()
-        if texte == "":
+        texte = self.chiffre.get("1.0", "end-1c").strip("\n")
+        if texte.strip() == "":
             messagebox.showwarning("Attention", "Aucun message recu", parent=self.fen)
             return
         try:

@@ -3,6 +3,8 @@ import string
 ALPHABET = string.ascii_uppercase
 ALPHABET_CESAR = string.ascii_uppercase + string.ascii_lowercase + string.digits + " "
 ALPHABET_PLAYFAIR = string.ascii_uppercase + string.digits
+ALPHABET_HILL = string.ascii_uppercase + " .,"
+MOD = len(ALPHABET_HILL)
 
 
 def nettoyer(texte, alphabet=ALPHABET):
@@ -129,9 +131,9 @@ def pgcd(a, b):
     return a
 
 
-def inverse_mod26(a):
-    for x in range(1, 26):
-        if (a * x) % 26 == 1:
+def inverse_modulo(a, mod):
+    for x in range(1, mod):
+        if (a * x) % mod == 1:
             return x
     return None
 
@@ -151,7 +153,7 @@ def determinant(m):
 
 def hill_cle(texte_cle):
     try:
-        nombres = [int(x) % 26 for x in texte_cle.replace(",", " ").split()]
+        nombres = [int(x) % MOD for x in texte_cle.replace(",", " ").split()]
     except ValueError:
         raise ValueError("La cle de Hill doit contenir uniquement des nombres")
     if len(nombres) == 4:
@@ -161,9 +163,9 @@ def hill_cle(texte_cle):
     else:
         raise ValueError("La cle de Hill doit contenir 4 nombres (2x2) ou 9 nombres (3x3)")
     m = [nombres[i * n:i * n + n] for i in range(n)]
-    det = determinant(m) % 26
-    if pgcd(det, 26) != 1:
-        raise ValueError("Cle non valide : le determinant (" + str(det) + ") n'est pas inversible modulo 26")
+    det = determinant(m) % MOD
+    if pgcd(det, MOD) != 1:
+        raise ValueError("Cle non valide : le determinant (" + str(det) + ") n'est pas inversible modulo " + str(MOD))
     identite = [[1 if i == j else 0 for j in range(n)] for i in range(n)]
     if m == identite:
         raise ValueError("Cle faible : la matrice identite ne chiffre pas le message")
@@ -172,15 +174,15 @@ def hill_cle(texte_cle):
 
 def hill_inverse(m):
     n = len(m)
-    inv = inverse_mod26(determinant(m) % 26)
+    inv = inverse_modulo(determinant(m) % MOD, MOD)
     if n == 2:
-        return [[(m[1][1] * inv) % 26, (-m[0][1] * inv) % 26],
-                [(-m[1][0] * inv) % 26, (m[0][0] * inv) % 26]]
+        return [[(m[1][1] * inv) % MOD, (-m[0][1] * inv) % MOD],
+                [(-m[1][0] * inv) % MOD, (m[0][0] * inv) % MOD]]
     resultat = [[0] * n for i in range(n)]
     for i in range(n):
         for j in range(n):
             cofacteur = (-1) ** (i + j) * determinant(sous_matrice(m, i, j))
-            resultat[j][i] = (cofacteur * inv) % 26
+            resultat[j][i] = (cofacteur * inv) % MOD
     return resultat
 
 
@@ -188,29 +190,29 @@ def hill_appliquer(texte, m):
     n = len(m)
     resultat = ""
     for i in range(0, len(texte), n):
-        bloc = [ALPHABET.index(c) for c in texte[i:i + n]]
+        bloc = [ALPHABET_HILL.index(c) for c in texte[i:i + n]]
         for ligne in m:
             somme = 0
             for k in range(n):
                 somme += ligne[k] * bloc[k]
-            resultat += ALPHABET[somme % 26]
+            resultat += ALPHABET_HILL[somme % MOD]
     return resultat
 
 
 def hill_chiffrer(texte, texte_cle):
     m = hill_cle(texte_cle)
-    texte = nettoyer(texte)
+    texte = nettoyer(texte, ALPHABET_HILL)
     while len(texte) % len(m) != 0:
-        texte += "X"
+        texte += " "
     return hill_appliquer(texte, m)
 
 
 def hill_dechiffrer(texte, texte_cle):
     m = hill_cle(texte_cle)
-    texte = nettoyer(texte)
+    texte = nettoyer(texte, ALPHABET_HILL)
     if len(texte) % len(m) != 0:
         raise ValueError("La longueur du texte chiffre doit etre un multiple de " + str(len(m)))
-    return hill_appliquer(texte, hill_inverse(m))
+    return hill_appliquer(texte, hill_inverse(m)).rstrip(" ")
 
 
 FAILLES = {
@@ -220,7 +222,8 @@ FAILLES = {
     "Playfair": "Faille : I et J confondus, chiffres perdus, lettres doublees et X de bourrage dans le resultat.\n"
                 "Solution : matrice 6x6 (A-Z et 0-9), lettre de bourrage X ou Q,\n"
                 "et suppression du bourrage apres le dechiffrement. Cle vide refusee.",
-    "Hill": "Faille : une matrice non inversible empeche le dechiffrement, la matrice identite ne chiffre rien,\n"
-            "et une petite matrice est sensible a l'attaque par texte clair connu.\n"
-            "Solution : verification du determinant modulo 26, refus de l'identite, matrice 3x3 possible.",
+    "Hill": "Faille : les espaces sont supprimes, une matrice non inversible empeche le dechiffrement,\n"
+            "la matrice identite ne chiffre rien et une petite matrice est sensible au texte clair connu.\n"
+            "Solution : alphabet de 29 symboles (A-Z, espace, point, virgule) donc les espaces sont gardes,\n"
+            "modulo 29 premier, verification du determinant, refus de l'identite, matrice 3x3 possible.",
 }
